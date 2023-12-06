@@ -14,7 +14,6 @@ public class handleBallTouch : MonoBehaviour
 
     void Start()
     {
-        Door = GameObject.Find("Door");
         cubeRenderer = gameObject.GetComponent<Renderer>();
         cubeRenderer.material = matRouge;
     }
@@ -28,7 +27,9 @@ public class handleBallTouch : MonoBehaviour
               Debug.Log("DoorOpen");
               cubeRenderer.material = matVert;
               DoorOpen = Door.transform.rotation = Quaternion.Euler(0, -90, 0);
-            }
+              Door.GetComponent<MeshCollider>().enabled = false;
+
+        }
     }
     private void OnTriggerExit(Collider other)
     {
@@ -37,6 +38,7 @@ public class handleBallTouch : MonoBehaviour
             Debug.Log("DoorClosed");
             cubeRenderer.material = matRouge;
             Door.transform.rotation = Quaternion.Euler(0, 0, 0);
+            Door.GetComponent<MeshCollider>().enabled=true;
         }
     }
 }

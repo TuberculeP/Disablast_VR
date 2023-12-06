@@ -1,0 +1,11 @@
+Name: Tenis_KORT
+Version: 2015
+Preview: Yes
+Units: Millimeters
+Dimension: 36570.0 x 18290.0 x 1060.65
+Polys: 760
+XForm: Yes
+Box Trick: Yes
+Model Parts: 1
+Render: Corona
+Formats: 3Ds Max 2015, OBJ, FBX
