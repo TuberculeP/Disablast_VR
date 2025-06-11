@@ -8,6 +8,7 @@ TagManager:
   - Ball
   - Limit
   - Hand
+  - Grenade
   layers:
   - Default
   - TransparentFX
