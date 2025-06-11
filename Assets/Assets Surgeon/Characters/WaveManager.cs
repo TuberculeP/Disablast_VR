@@ -1,28 +1,30 @@
-using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.AI;
 
 public class WaveManager : MonoBehaviour
 {
     public GameObject followerPrefab;
-    public Transform spawnCenter;
     public Transform target;
-
-    public float terrainLength = 10f; // X axis size
-    public float terrainWidth = 10f;  // Z axis size
-    public float spawnAmplitude = 5f; // Area around the terrain
     public int initialCount = 5;
+    public float spawnAmplitude = 10f;
+    public float terrainX = 20f;
+    public float terrainZ = 20f;
+    public Vector3 center = Vector3.zero; // Centrage du terrain
 
-    private int currentCount;
-    private List<GameObject> currentFollowers = new List<GameObject>();
+    private int currentCount = 0;
+    public List<GameObject> currentFollowers = new();
+
+    private bool waveInProgress = false;
 
     void Start()
     {
-        currentCount = 0;
+        StartNewWave(); // Lancer la première vague automatiquement
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (waveInProgress && currentFollowers.Count == 0)
         {
             StartNewWave();
         }
@@ -30,68 +32,50 @@ public class WaveManager : MonoBehaviour
 
     void StartNewWave()
     {
-        // Clear previous followers
-        foreach (var follower in currentFollowers)
-        {
-            if (follower != null)
-                Destroy(follower);
-        }
-        currentFollowers.Clear();
-
-        // Double count (except first wave)
-        if (currentCount == 0)
-            currentCount = initialCount;
-        else
-            currentCount *= 2;
+        currentCount = (currentCount == 0) ? initialCount : currentCount + 3;
 
         for (int i = 0; i < currentCount; i++)
         {
             Vector3 spawnPos = GetRandomSpawnPosition();
-            GameObject newFollower = Instantiate(followerPrefab, spawnPos, Quaternion.identity);
-
-            // Assigner la cible si le script existe
-            Follower followerScript = newFollower.GetComponent<Follower>();
-            if (followerScript != null)
-            {
-                followerScript.target = target;
-            }
-
-            currentFollowers.Add(newFollower);
+            GameObject follower = Instantiate(followerPrefab, spawnPos, Quaternion.identity);
+            follower.GetComponent<Follower>().target = target;
+            currentFollowers.Add(follower);
         }
 
-        Debug.Log($"Vague lancée : {currentCount} followers");
+        waveInProgress = true;
     }
 
     Vector3 GetRandomSpawnPosition()
     {
-        float halfLength = terrainLength / 2f;
-        float halfWidth = terrainWidth / 2f;
-
-        // Choisir un côté au hasard : 0=haut, 1=bas, 2=gauche, 3=droite
-        int side = Random.Range(0, 4);
-        float x = 0f, z = 0f;
-
-        switch (side)
+        for (int i = 0; i < 10; i++) // 10 tentatives max
         {
-            case 0: // Haut (devant le terrain)
-                x = Random.Range(-halfLength - spawnAmplitude, halfLength + spawnAmplitude);
-                z = halfWidth + Random.Range(0, spawnAmplitude);
-                break;
-            case 1: // Bas
-                x = Random.Range(-halfLength - spawnAmplitude, halfLength + spawnAmplitude);
-                z = -halfWidth - Random.Range(0, spawnAmplitude);
-                break;
-            case 2: // Gauche
-                x = -halfLength - Random.Range(0, spawnAmplitude);
-                z = Random.Range(-halfWidth, halfWidth);
-                break;
-            case 3: // Droite
-                x = halfLength + Random.Range(0, spawnAmplitude);
-                z = Random.Range(-halfWidth, halfWidth);
-                break;
+            float x = 0f;
+            float z = 0f;
+
+            if (Random.value > 0.5f)
+            {
+                float xMin = terrainX;
+                float xMax = terrainX + spawnAmplitude;
+                x = (Random.value > 0.5f) ? Random.Range(xMin, xMax) : Random.Range(-xMax, -xMin);
+                z = Random.Range(-terrainZ - spawnAmplitude, terrainZ + spawnAmplitude);
+            }
+            else
+            {
+                float zMin = terrainZ;
+                float zMax = terrainZ + spawnAmplitude;
+                z = (Random.value > 0.5f) ? Random.Range(zMin, zMax) : Random.Range(-zMax, -zMin);
+                x = Random.Range(-terrainX - spawnAmplitude, terrainX + spawnAmplitude);
+            }
+
+            Vector3 candidate = new Vector3(x, 5f, z); // y=5 pour éviter d’être dans le sol
+
+            if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 10f, NavMesh.AllAreas))
+            {
+                return hit.position;
+            }
         }
 
-        Vector3 spawnPos = spawnCenter.position + new Vector3(x, 0f, z);
-        return spawnPos;
+        Debug.LogWarning("No valid NavMesh spawn position found!");
+        return center; // fallback pour éviter crash
     }
 }
