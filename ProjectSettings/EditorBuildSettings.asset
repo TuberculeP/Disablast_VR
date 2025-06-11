@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/External/vr-wheelchair-main/Assets/Scenes/Prototype.unity
     guid: d1aa0518651f943b0b39a88dac1e83e1
   - enabled: 1
-    path: Assets/Scenes/Escape.unity
+    path: Assets/Scenes/EscapeTest.unity
     guid: 07f579cf0569a4ebb8ea1bf276d32758
   m_configObjects:
     Unity.XR.Oculus.Settings: {fileID: 11400000, guid: bfa1182bd221b4ca89619141f66f1260, type: 2}
