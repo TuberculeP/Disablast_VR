@@ -8,10 +8,14 @@ public class WaveManager : MonoBehaviour
     public GameObject followerPrefab;
     public Transform target;
     public int initialCount = 5;
+    public int newWaveCount = 5;
     public float spawnAmplitude = 10f;
     public float terrainX = 20f;
     public float terrainZ = 20f;
     public Vector3 center = Vector3.zero; // Centrage du terrain
+
+    public AudioClip waveStartSound; // 🔊 Son à jouer
+    public AudioSource audioSource; // 🎚️ Composant AudioSource
 
     private int currentCount = 0;
     public List<GameObject> currentFollowers = new();
@@ -20,6 +24,12 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+        }
+
         StartNewWave(); // Lancer la premi�re vague automatiquement
     }
 
@@ -33,7 +43,12 @@ public class WaveManager : MonoBehaviour
 
     void StartNewWave()
     {
-        currentCount = (currentCount == 0) ? initialCount : currentCount + 3;
+        if (waveStartSound != null)
+        {
+            audioSource.PlayOneShot(waveStartSound);
+        }
+
+        currentCount = (currentCount == 0) ? initialCount : currentCount + newWaveCount;
 
         for (int i = 0; i < currentCount; i++)
         {
