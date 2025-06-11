@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -19,7 +20,7 @@ public class WaveManager : MonoBehaviour
 
     void Start()
     {
-        StartNewWave(); // Lancer la première vague automatiquement
+        StartNewWave(); // Lancer la premiï¿½re vague automatiquement
     }
 
     void Update()
@@ -40,6 +41,12 @@ public class WaveManager : MonoBehaviour
             GameObject follower = Instantiate(followerPrefab, spawnPos, Quaternion.identity);
             follower.GetComponent<Follower>().target = target;
             currentFollowers.Add(follower);
+
+            follower.GetComponent<SurgeonDeathController>().SetOnDeathCallback(() =>
+            {
+                currentFollowers.Remove(follower);
+                Destroy(follower);
+            });
         }
 
         waveInProgress = true;
@@ -67,7 +74,7 @@ public class WaveManager : MonoBehaviour
                 x = Random.Range(-terrainX - spawnAmplitude, terrainX + spawnAmplitude);
             }
 
-            Vector3 candidate = new Vector3(x, 5f, z); // y=5 pour éviter d’être dans le sol
+            Vector3 candidate = new Vector3(x, 5f, z); // y=5 pour ï¿½viter dï¿½ï¿½tre dans le sol
 
             if (NavMesh.SamplePosition(candidate, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
@@ -76,6 +83,6 @@ public class WaveManager : MonoBehaviour
         }
 
         Debug.LogWarning("No valid NavMesh spawn position found!");
-        return center; // fallback pour éviter crash
+        return center; // fallback pour ï¿½viter crash
     }
 }
